@@ -11,7 +11,7 @@ pipeline:
   build:
     image: golang
     commands:
-    - go build -v -o svc
+    - go build -v
     environment:
     - CGO_ENABLED=0
     - GOOS=linux
