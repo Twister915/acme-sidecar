@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"context"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 type Provider struct {
@@ -27,7 +28,7 @@ func (p *Provider) Get(ctx context.Context, key string) (secretContents []byte, 
 	}
 
 	if secret.Status() == 404 {
-		err = errors.ErrNotExist
+		err = autocert.ErrCacheMiss
 		return
 	}
 
