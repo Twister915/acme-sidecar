@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"context"
 	"golang.org/x/crypto/acme/autocert"
+	"strings"
 )
 
 type Provider struct {
@@ -21,6 +22,7 @@ func NewProvider() *Provider {
 }
 
 func (p *Provider) Get(ctx context.Context, key string) (secretContents []byte, err error) {
+	key = safeKeyName(key)
 	secret, err := p.client.request().prepare("GET", "v1", "secrets", key)()
 	if err != nil {
 		return
@@ -41,6 +43,7 @@ func (p *Provider) Get(ctx context.Context, key string) (secretContents []byte, 
 }
 
 func (p *Provider) Put(ctx context.Context, key string, data []byte) (err error) {
+	key = safeKeyName(key)
 	err = p.sendSecret(ctx, key, []interface{}{key}, data, "PUT")
 	if err != nil {
 		err = p.sendSecret(ctx, key, []interface{}{}, data, "POST")
@@ -74,6 +77,12 @@ func (p *Provider) sendSecret(ctx context.Context, key string, urlCmps []interfa
 }
 
 func (p *Provider) Delete(ctx context.Context, key string) (err error) {
+	key = safeKeyName(key)
 	_, err = p.client.request().prepare("DELETE", "v1", "secrets", key)()
 	return
+}
+
+func safeKeyName(name string) string {
+	name = strings.Replace(name, "_", "-u-", -1)
+	return name
 }
