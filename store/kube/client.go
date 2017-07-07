@@ -3,6 +3,7 @@ package kube
 import (
 	"io/ioutil"
 	"path/filepath"
+	"github.com/apex/log"
 )
 
 type client struct {
@@ -26,15 +27,20 @@ func newClient() (c *client, err error) {
 		return
 	}
 
+	log.Infof("token => %s", tokenData)
+
 	caData, err := ioutil.ReadFile(filepath.Join(authDir, ca))
 	if err != nil {
 		caData = nil
+		log.WithError(err).Warn("could not read ca from dir")
 	}
 
 	nsData, err := ioutil.ReadFile(filepath.Join(authDir, namespace))
 	if err != nil {
 		return
 	}
+
+	log.Infof("namespace => %s", nsData)
 
 	c = &client{token: tokenData, ca: caData, namespace: nsData}
 	return

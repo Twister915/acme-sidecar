@@ -3,6 +3,4 @@ import:
 - package: golang.org/x/crypto
   subpackages:
   - acme/autocert
-- package: golang.org/x/net
-  subpackages:
-  - context
+- package: github.com/apex/log

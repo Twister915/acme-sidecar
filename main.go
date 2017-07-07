@@ -5,20 +5,29 @@ import (
 	"github.com/Twister915/acme-sidecar/server"
 	"os"
 	"strconv"
+	"github.com/apex/log"
 )
 
 func main() {
+	log.Info("starting application")
 	srv := server.Server{
-		TargetPort: getPort(),
+		ListenPort: getPort("LISTEN"),
+		TargetPort: getPort("TARGET"),
 		Domain: getDomain(),
 		Store: store.GetProvider("kubernetes"),
 	}
+	ctx := log.WithFields(log.Fields{
+		"listen": srv.ListenPort,
+		"target": srv.TargetPort,
+		"domain": srv.Domain,
+	})
+	ctx.Info("server configured")
 
 	srv.Start()
 }
 
-func getPort() int {
-	p := os.Getenv("PORT")
+func getPort(name string) int {
+	p := os.Getenv(name + "_PORT")
 	if len(p) > 0 {
 		port, err := strconv.Atoi(p)
 		if err == nil {
@@ -26,7 +35,13 @@ func getPort() int {
 		}
 	}
 
-	return 443
+	switch name {
+	case "LISTEN":
+		log.Warn("using default port 443 to listen")
+		return 443
+	default:
+		panic("must specify the TARGET_PORT env var")
+	}
 }
 
 func getDomain() string {

@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 	"encoding/json"
+	"github.com/apex/log"
 )
 
 type requestIn struct {
@@ -100,14 +101,30 @@ func (r *requestIn) prepare(method, version, resource string, urlComponents ...i
 			}
 			req.Body = reader
 		}
+
+		ctx := log.WithFields(log.Fields{
+			"method": method,
+			"version": version,
+			"resource": resource,
+			"url": urlStr,
+		})
+
+		ctx.Info("sending kubernetes request")
+		start := time.Now()
 		respData, err := httpClient.Do(&req)
+		end := time.Now()
 		if err != nil {
+			ctx.WithError(err).Warnf("kube request failed")
 			return
 		}
 		defer respData.Body.Close()
-
 		resp.statusCode = respData.StatusCode
 		resp.data, err = ioutil.ReadAll(respData.Body)
+		if err != nil {
+			ctx.WithError(err).Warnf("could not read body")
+			return
+		}
+		ctx.Infof("kube request took %s", end.Sub(start).String())
 		return
 	}
 }
