@@ -49,7 +49,7 @@ func (p *Provider) Put(ctx context.Context, key string, data []byte) (err error)
 }
 
 func (p *Provider) sendSecret(ctx context.Context, key string, data []byte, method string) (err error) {
-	resp, err := p.client.request().prepare("PUT", "v1", "secrets", key)(map[string]interface{}{
+	resp, err := p.client.request().prepare(method, "v1", "secrets", key)(map[string]interface{}{
 		"apiVersion": "v1",
 		"data": map[string]string{
 			"data": base64.StdEncoding.EncodeToString(data),
