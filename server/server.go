@@ -20,8 +20,10 @@ func (srv *Server) Start() {
 		f()
 	}
 
+	wg.Add(1)
 	go do(srv.startTlsServer)
 	if srv.RedirectPort > 0 {
+		wg.Add(1)
 		go do(srv.startRedirectServer)
 	}
 
