@@ -41,6 +41,14 @@ func (p *Provider) Get(ctx context.Context, key string) (secretContents []byte, 
 }
 
 func (p *Provider) Put(ctx context.Context, key string, data []byte) (err error) {
+	err = p.sendSecret(ctx, key, data, "PUT")
+	if err != nil {
+		err = p.sendSecret(ctx, key, data, "POST")
+	}
+	return
+}
+
+func (p *Provider) sendSecret(ctx context.Context, key string, data []byte, method string) (err error) {
 	resp, err := p.client.request().prepare("PUT", "v1", "secrets", key)(map[string]interface{}{
 		"apiVersion": "v1",
 		"data": map[string]string{
