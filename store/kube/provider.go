@@ -84,5 +84,5 @@ func (p *Provider) Delete(ctx context.Context, key string) (err error) {
 
 func safeKeyName(name string) string {
 	name = strings.Replace(name, "_", "-u-", -1)
-	return name
+	return fmt.Sprintf("acmefile-%s", name)
 }

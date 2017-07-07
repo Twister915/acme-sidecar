@@ -13,6 +13,7 @@ func main() {
 	srv := server.Server{
 		ListenPort: getPort("LISTEN"),
 		TargetPort: getPort("TARGET"),
+		RedirectPort: getPort("REDIRECT"),
 		Domain: getDomain(),
 		Store: store.GetProvider("kubernetes"),
 	}
@@ -39,6 +40,16 @@ func getPort(name string) int {
 	case "LISTEN":
 		log.Warn("using default port 443 to listen")
 		return 443
+	case "REDIRECT":
+		switch os.Getenv("REDIRECT_HTTP") {
+		case "1", "true":
+			return 80
+		case "0", "false":
+			return 0
+		default:
+			log.Warn("redirect server is not enabled")
+			return 0
+		}
 	default:
 		panic("must specify the TARGET_PORT env var")
 	}
