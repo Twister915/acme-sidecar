@@ -1,29 +1,24 @@
 package store
 
 import (
-	"github.com/Twister915/acme-sidecar/certs"
 	"github.com/Twister915/acme-sidecar/store/kube"
 	"fmt"
+	"golang.org/x/crypto/acme/autocert"
 )
 
-var registeredProviders = make(map[string]func() Provider)
+var registeredProviders = make(map[string]func() autocert.Cache)
 
-type Provider interface {
-	Get(id string) (cert certs.Cert, err error)
-	Put(id string, cert certs.Cert) (err error)
-}
-
-func register(id string, factory func() Provider) {
+func register(id string, factory func() autocert.Cache) {
 	registeredProviders[id] = factory
 }
 
 func init() {
-	register("kubernetes", func() Provider {
+	register("kubernetes", func() autocert.Cache {
 		return kube.NewProvider()
 	})
 }
 
-func GetProvider(name string) Provider {
+func GetProvider(name string) autocert.Cache {
 	factory, has := registeredProviders[name]
 	if !has {
 		panic(fmt.Sprintf("could not find provider %s", name))

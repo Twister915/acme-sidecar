@@ -1,11 +1,10 @@
 package kube
 
 import (
-	"github.com/Twister915/acme-sidecar/certs"
 	"github.com/Twister915/acme-sidecar/store/errors"
 	"encoding/base64"
-	"time"
 	"fmt"
+	"golang.org/x/net/context"
 )
 
 type Provider struct {
@@ -21,8 +20,8 @@ func NewProvider() *Provider {
 	return &Provider{client: client}
 }
 
-func (p *Provider) Get(id string) (cert certs.Cert, err error) {
-	secret, err := p.client.request().prepare("GET", "v1", "secrets", id)()
+func (p *Provider) Get(ctx context.Context, key string) (secretContents []byte, err error) {
+	secret, err := p.client.request().prepare("GET", "v1", "secrets", key)()
 	if err != nil {
 		return
 	}
@@ -32,38 +31,29 @@ func (p *Provider) Get(id string) (cert certs.Cert, err error) {
 		return
 	}
 
-
 	data, err := secret.AsMap()
-	secretContents := data["data"].(map[string]interface{})
-	cert.Expires, err = time.Parse(time.RFC822Z, string(readContentsSecret(secretContents, "expires")))
 	if err != nil {
-		panic(err)
+		return
 	}
-	cert.Domain = string(readContentsSecret(secretContents, "domain"))
-	cert.Certificate = readContentsSecret(secretContents, "certificate")
-	cert.Key = readContentsSecret(secretContents, "key")
+
+	secretContents, err = base64.StdEncoding.DecodeString(data["data"].(map[string]interface{})["data"].(string))
 	return
 }
 
-func (p *Provider) Put(id string, cert certs.Cert) (err error) {
-	data := make(map[string]string)
-	putContentsSecret(data, "expires", []byte(cert.Expires.Format(time.RFC822Z)))
-	putContentsSecret(data, "domain", []byte(cert.Domain))
-	putContentsSecret(data, "certificate", cert.Certificate)
-	putContentsSecret(data, "key", cert.Key)
-
-	secret := map[string]interface{}{
+func (p *Provider) Put(ctx context.Context, key string, data []byte) (err error) {
+	resp, err := p.client.request().prepare("PUT", "v1", "secrets", key)(map[string]interface{}{
 		"apiVersion": "v1",
-		"data": data,
+		"data": map[string]string{
+			"data": base64.StdEncoding.EncodeToString(data),
+		},
 		"kind": "Secret",
 		"metadata": map[string]interface{}{
-			"name": id,
+			"name": key,
 			"namespace": string(p.client.namespace),
 		},
 		"type": "Opaque",
-	}
+	})
 
-	resp, err := p.client.request().prepare("PUT", "v1", "secrets", id)(secret)
 	if err != nil {
 		return
 	}
@@ -75,15 +65,7 @@ func (p *Provider) Put(id string, cert certs.Cert) (err error) {
 	return
 }
 
-func readContentsSecret(data map[string]interface{}, key string) (out []byte) {
-	var err error
-	out, err = base64.StdEncoding.DecodeString(data[key].(string))
-	if err != nil {
-		panic(err)
-	}
+func (p *Provider) Delete(ctx context.Context, key string) (err error) {
+	_, err = p.client.request().prepare("DELETE", "v1", "secrets", key)()
 	return
-}
-
-func putContentsSecret(data map[string]string, key string, d []byte) {
-	data[key] = base64.StdEncoding.EncodeToString(d)
 }

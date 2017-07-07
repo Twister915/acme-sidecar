@@ -12,7 +12,7 @@ type client struct {
 	namespace  []byte
 }
 
-func newClient() (client *client, err error) {
+func newClient() (c *client, err error) {
 	const (
 		authDir = "/var/run/secrets/kubernetes.io/serviceaccount"
 
@@ -36,7 +36,7 @@ func newClient() (client *client, err error) {
 		return
 	}
 
-	client = &client{token: tokenData, ca: caData, namespace: nsData}
+	c = &client{token: tokenData, ca: caData, namespace: nsData}
 	return
 }
 

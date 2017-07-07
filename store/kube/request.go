@@ -82,7 +82,9 @@ func (r *requestIn) prepare(method, version, resource string, urlComponents ...i
 			b := body[0]
 			var reader io.ReadCloser
 			switch bod := b.(type) {
-			case []byte, string:
+			case []byte:
+				reader = ioutil.NopCloser(bytes.NewReader(bod))
+			case string:
 				reader = ioutil.NopCloser(bytes.NewReader([]byte(bod)))
 			case io.Reader:
 				reader = ioutil.NopCloser(bod)
