@@ -38,8 +38,8 @@ func (r *requestIn) prepare(method, version, resource string, urlComponents ...i
 
 	tlsCfg := transport.TLSClientConfig
 	if r.client.ca != nil {
-		tlsCfg.ClientCAs = x509.NewCertPool()
-		tlsCfg.ClientCAs.AppendCertsFromPEM(r.client.ca)
+		tlsCfg.RootCAs = x509.NewCertPool()
+		tlsCfg.RootCAs.AppendCertsFromPEM(r.client.ca)
 	}
 
 	//and a new request
