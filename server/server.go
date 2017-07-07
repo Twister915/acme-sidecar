@@ -40,7 +40,7 @@ func (srv *Server) Start() {
 	revProxy := httputil.NewSingleHostReverseProxy(target)
 
 	s := &http.Server{
-		Addr:      fmt.Sprintf(":%d", srv.TargetPort),
+		Addr:      fmt.Sprintf(":%d", srv.ListenPort),
 		TLSConfig: &tls.Config{GetCertificate: manager.GetCertificate},
 		Handler: revProxy,
 	}
