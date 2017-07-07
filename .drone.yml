@@ -22,4 +22,4 @@ pipeline:
     repo: twister915/acme-sidecar
     secrets: [docker_username, docker_password]
     tags:
-    - $${DRONE_COMMIT_SHA:0:12}
+    - ${DRONE_COMMIT_SHA:0:8}
