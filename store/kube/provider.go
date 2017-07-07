@@ -1,7 +1,6 @@
 package kube
 
 import (
-	"github.com/Twister915/acme-sidecar/store/errors"
 	"encoding/base64"
 	"fmt"
 	"context"
