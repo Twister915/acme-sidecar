@@ -26,5 +26,5 @@ func (srv *Server) Start() {
 		Addr:      fmt.Sprintf(":%d", srv.TargetPort),
 		TLSConfig: &tls.Config{GetCertificate: manager.GetCertificate},
 	}
-	s.ListenAndServeTLS("", "")
+	must(s.ListenAndServeTLS("", ""))
 }
