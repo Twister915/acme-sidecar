@@ -41,15 +41,15 @@ func (p *Provider) Get(ctx context.Context, key string) (secretContents []byte, 
 }
 
 func (p *Provider) Put(ctx context.Context, key string, data []byte) (err error) {
-	err = p.sendSecret(ctx, key, data, "PUT")
+	err = p.sendSecret(ctx, key, []interface{}{key}, data, "PUT")
 	if err != nil {
-		err = p.sendSecret(ctx, key, data, "POST")
+		err = p.sendSecret(ctx, key, []interface{}{}, data, "POST")
 	}
 	return
 }
 
-func (p *Provider) sendSecret(ctx context.Context, key string, data []byte, method string) (err error) {
-	resp, err := p.client.request().prepare(method, "v1", "secrets", key)(map[string]interface{}{
+func (p *Provider) sendSecret(ctx context.Context, key string, urlCmps []interface{}, data []byte, method string) (err error) {
+	resp, err := p.client.request().prepare(method, "v1", "secrets", urlCmps...)(map[string]interface{}{
 		"apiVersion": "v1",
 		"data": map[string]string{
 			"data": base64.StdEncoding.EncodeToString(data),
