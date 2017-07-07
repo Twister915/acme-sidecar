@@ -43,6 +43,8 @@ func (r *requestIn) prepare(method, version, resource string, urlComponents ...i
 		tlsCfg.RootCAs.AppendCertsFromPEM(r.client.ca)
 	}
 
+	httpClient.Transport = transport
+
 	//and a new request
 	var req http.Request
 	req.Method = method
