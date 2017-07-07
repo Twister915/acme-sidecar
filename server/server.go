@@ -27,12 +27,4 @@ func (srv *Server) Start() {
 		TLSConfig: &tls.Config{GetCertificate: manager.GetCertificate},
 	}
 	s.ListenAndServeTLS("", "")
-
-	forever := make(chan interface{})
-	<-forever
-}
-
-func defaultHandler(writer http.ResponseWriter, req *http.Request) {
-	writer.WriteHeader(200)
-	writer.Write([]byte("ok"))
 }
