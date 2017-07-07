@@ -1,0 +1,8 @@
+package: github.com/Twister915/acme-sidecar
+import:
+- package: golang.org/x/crypto
+  subpackages:
+  - acme/autocert
+- package: golang.org/x/net
+  subpackages:
+  - context
